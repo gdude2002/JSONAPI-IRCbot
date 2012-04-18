@@ -1,0 +1,12 @@
+irc:
+    server: irc.archivesmc.com
+    port: 6667
+    channels:
+        - "#jsonbot-test"
+
+jsonapi:
+    address: localhost
+    port: 20059
+    username: admin
+    password: demo
+    salt: ''
