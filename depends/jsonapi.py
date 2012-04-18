@@ -94,14 +94,6 @@ class MinecraftJsonApi (object):
           Copied with minor edits from examples on:
               http://docs.python.org/library/socket.html
           '''
-        '''try:
-              flags = socket.AI_ADDRCONFIG
-          except AttributeError:
-              flags = 0
-          for res in socket.getaddrinfo(self.host, (self.port+1),
-                  socket.AF_UNSPEC, socket.SOCK_STREAM,
-                  socket.IPPROTO_TCP,	flags):
-              af, socktype, proto, canonname, sa = res'''
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             port = self.port +1
@@ -124,8 +116,7 @@ class MinecraftJsonApi (object):
           Transform the method definition JSON into a dictionary
           containing only the attributes needed for the wrapper.
           '''
-        attrs = {}
-        attrs['name'] = method.get('name', '')
+        attrs = {'name': method.get('name', '')}
         if attrs['name'] < 0:
             raise Exception('Malformed method definition in JSON')
 
@@ -294,32 +285,32 @@ class MinecraftJsonApi (object):
         else:
             return None
 
-if __name__ == '__main__':
-    # Some basic test code
-    # Read params
-    paramDefaults = {'host': 'localhost', 'port':20059, 'username':'admin', 'password':'demo', 'salt':''}
-    filterFuncs = {'host': str, 'port': int, 'username': str, 'password': str, 'salt': str}
-    params = {}
-    for k in paramDefaults.keys():
-        value = raw_input("%s (%s): " % (k.capitalize(), str(paramDefaults[k])))
-        if len(value):
-            params[k] = filterFuncs[k](value)
-        else:
-            params[k] = paramDefaults[k]
-
-    api = MinecraftJsonApi(
-        host = params['host'],
-        port = params['port'],
-        username = params['username'],
-        password = params['password'],
-        salt = params['salt']
-    )
-
-    print([m['method_name'] for m in api.getLoadedMethods()])
-    print (api.getMethod('kickPlayer'))
-    x = True
-    while x:
-        method = raw_input('>')
-        print (api.getMethod(method))
-        method = raw_input('->')
-        print api.call(method)
+#if __name__ == '__main__':
+#    # Some basic test code
+#    # Read params
+#    paramDefaults = {'host': 'localhost', 'port':20059, 'username':'admin', 'password':'demo', 'salt':''}
+#    filterFuncs = {'host': str, 'port': int, 'username': str, 'password': str, 'salt': str}
+#    params = {}
+#    for k in paramDefaults.keys():
+#        value = raw_input("%s (%s): " % (k.capitalize(), str(paramDefaults[k])))
+#        if len(value):
+#            params[k] = filterFuncs[k](value)
+#        else:
+#            params[k] = paramDefaults[k]
+#
+#    api = MinecraftJsonApi(
+#        host = params['host'],
+#        port = params['port'],
+#        username = params['username'],
+#        password = params['password'],
+#        salt = params['salt']
+#    )
+#
+#    print([m['method_name'] for m in api.getLoadedMethods()])
+#    print (api.getMethod('kickPlayer'))
+#    x = True
+#    while x:
+#        method = raw_input('>')
+#        print (api.getMethod(method))
+#        method = raw_input('->')
+#        print api.call(method)
