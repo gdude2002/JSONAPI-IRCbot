@@ -4,7 +4,21 @@ import yaml, sys, os
 from constants import *
 
 class yaml_loader(object):
+    """
+    Wrapper for PyYaml that acts like a dict.
+    It's simply for parsing YAML files; because plugins needed an easier way
+    to get at data files.
+    """
+
     def __init__(self, plugin=False, pluginName=None):
+        """
+        Initializer for the yaml object
+
+        Params:
+            (bool) plugin:     Are you loading plugin data files?
+            (str ) pluginName: If so, what's the name of your plugin?
+        """
+
         self.plugin = plugin
         if self.plugin:
             if not pluginName:
@@ -13,6 +27,16 @@ class yaml_loader(object):
         self.data = {}
 
     def load(self, filename):
+        """
+        Load data from a YAML file
+
+        Params:
+            (str) filename: Path to file
+
+        Returns:
+            (dict) Parsed YAML data
+        """
+
         if self.plugin:
             if not os.path.exists("plugins/data/%s" % self.pluginName):
                 os.mkdir("plugins/data/%s" % self.pluginName)
@@ -24,7 +48,18 @@ class yaml_loader(object):
         return self.data
 
     def save(self, filename):
-        done = [False, ""]
+        """
+        Save stored data to a YAML file
+
+        Params:
+            (str ) filename: Filename to save to
+
+        returns:
+            (list) [
+                (bool) If the operation succeeded
+                (str ) Error message from Python
+            ]
+        """
         try:
             if self.plugin:
                 fh = open("plugins/data/%s/%s.yml" % (self.pluginName, filename), "w")
@@ -43,6 +78,14 @@ class yaml_loader(object):
         return done
 
     def save_data(self, filename, data):
+        """
+        Save a dict to a file, setting the object's data to
+        the dict
+
+        Params:
+            (str ) filename: Filename to save to
+            (dict) data: Data to store/set to object
+        """
         if isinstance(data, dict):
             self.data = data
         else:
