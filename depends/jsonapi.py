@@ -87,25 +87,25 @@ class MinecraftJsonApi (object):
         )
 
     def __createsocket(self):
-        '''
+        """
           Setup a socket connection to the server and return a file like
           object for reading and writing.
 
           Copied with minor edits from examples on:
               http://docs.python.org/library/socket.html
-          '''
+        """
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             port = self.port +1
             sock.connect((self.host, port))
-        except socket.error:
+        except socket.error as e:
             if sock:
                 sock.close()
                 sock = None
             #continue
             #break
             if not sock:
-                raise Exception('Connect failed')
+                raise e
 
         return MinecraftStream(sock.makefile('rwb'))
 
@@ -141,12 +141,12 @@ class MinecraftJsonApi (object):
         return attrs
 
     def __createMethod (self, method):
-        '''
+        """
           Create a dynamic method based on provided definition.
 
           TODO: Is there a better way to do this? Possibly via closure to
           avoid exec
-          '''
+        """
         def makeMethod (method):
             call_name = method['call_name']
             def _method (self, *args):
