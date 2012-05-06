@@ -1,6 +1,8 @@
 irc:
     server: irc.archivesmc.com
     port: 6667
+    timeout: 120
+    nick: JSONBot
     channels:
         - "#jsonbot-test"
 
@@ -10,3 +12,8 @@ jsonapi:
     username: admin
     password: demo
     salt: ''
+
+logging:
+    simple: true
+    timestamps: true
+    debug: false

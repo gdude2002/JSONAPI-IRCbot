@@ -12,9 +12,10 @@ class Logger(object):
     It styles output in the corresponding format.
     """
 
-    def __init__(self, simpleoutput=True, timestamps=True, sessionoutput=True):
+    def __init__(self, simpleoutput=True, timestamps=True, debugoutput=False):
         self.simpleoutput = simpleoutput
         self.timestamps = timestamps
+        self.debugoutput = debugoutput
 
         self.files = {
             "console": "logs/console.log",
@@ -24,11 +25,6 @@ class Logger(object):
             "critical": "logs/critical.log",
             "debug": "logs/debug.log",
         }
-
-        if sessionoutput:
-            for element in self.files.values():
-                self._writeToFile("=== Session started: %s" % datetime.datetime.now().strftime(" %d/%b/%Y %H:%M:%S ===")
-                    , element)
 
     def _writeToFile(self, data, filename):
         """
@@ -144,19 +140,20 @@ class Logger(object):
             Debug-level logging
         """
 
-        timestamp = datetime.datetime.now().strftime("| %d %b %Y | %H:%M:%S |")
+        if self.debugoutput:
+            timestamp = datetime.datetime.now().strftime("| %d %b %Y | %H:%M:%S |")
 
-        if self.simpleoutput:
-            identifier = "?"
-        else:
-            identifier = " DEBUG    "
-        if self.timestamps:
-            data = "%s%s| %s" % ( timestamp, identifier, message )
-            self._writeToFile(data, self.files["console"])
-            self._writeToFile(data, self.files["debug"])
-        else:
-            data = "|%s| %s" % ( identifier, message )
-            self._writeToFile(timestamp + data, self.files["console"])
-            self._writeToFile(timestamp + data, self.files["debug"])
+            if self.simpleoutput:
+                identifier = "?"
+            else:
+                identifier = " DEBUG    "
+            if self.timestamps:
+                data = "%s%s| %s" % ( timestamp, identifier, message )
+                self._writeToFile(data, self.files["console"])
+                self._writeToFile(data, self.files["debug"])
+            else:
+                data = "|%s| %s" % ( identifier, message )
+                self._writeToFile(timestamp + data, self.files["console"])
+                self._writeToFile(timestamp + data, self.files["debug"])
 
-        print data
+            print data

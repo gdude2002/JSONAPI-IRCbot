@@ -1,5 +1,4 @@
 # coding=utf-8
-# coding=utf-8
 import os, random, time, math, traceback
 import thread, string
 
@@ -15,16 +14,7 @@ from depends import jsonapi
 class Bot(irc.IRCClient):
 
     def __init__(self):
-        pass
-
-    def connectionLost(self, reason):
-        """
-        Called when the connection is lost.
-
-        Params:
-            (str) reason: Reason for losing connection
-        """
-        pass
+        self.log_handler.debug("Bot instance created.")
 
     @property
     def nickname(self):
@@ -38,7 +28,9 @@ class Bot(irc.IRCClient):
         Called when the bot has connected to the server and
         signed on.
         """
-        pass
+        self.log_handler.info("Signed on.")
+        for channel in self.channels_to_join:
+            self.join(channel)
 
     def joined(self, channel):
         """
@@ -47,9 +39,8 @@ class Bot(irc.IRCClient):
         Params:
             (str) channel: Channel that was joined
         """
-        pass
+        self.log_handler.info("Channel joined: %s" % channel)
 
-    @run_async
     def privmsg(self, user, channel, msg):
         """
         Called when a message is received.
@@ -60,7 +51,7 @@ class Bot(irc.IRCClient):
                 (Can also be the nick of the bot in a query)
             (str) msg:     The message content
         """
-        pass
+        self.log_handler.info("%s | <%s> %s" % (channel, user, msg))
 
     def left(self, channel):
         """
@@ -69,10 +60,9 @@ class Bot(irc.IRCClient):
         Params:
             (str) channel: Channel that was left
         """
-        pass
+        self.log_handler.info("Channel parted: %s" % channel)
 
-    @run_async
-    def ctcpQuery(self, user, me, messages):
+    def ctcpUnknownQuery(self, user, channel, tag, data):
         """
         Called when the bot recieves a CTCP Query.
 
@@ -81,7 +71,7 @@ class Bot(irc.IRCClient):
             (??? ) me:       ???
             (list) messages: ???
         """
-        pass
+        self.log_handler.info("%s | [%s %s] %s" % (channel, user, tag, data))
 
     def modeChanged(self, user, channel, set, modes, args):
         """
@@ -94,7 +84,28 @@ class Bot(irc.IRCClient):
             (str ) modes:   The list of modes set
             (list) args:    The arguments for the modes
         """
-        pass
+
+        parsed_args = []
+
+        for element in args:
+            if element:
+                parsed_args.append(element)
+            else:
+                parsed_args.append("")
+
+        args = parsed_args
+        del parsed_args
+
+        if set:
+            if channel == self.nickname:
+                self.log_handler.info("%s | %s set mode +%s %s" % (channel, user, modes, " ".join(args)))
+            else:
+                self.log_handler.info("%s | %s set mode +%s %s" % (channel, user, modes, " ".join(args)))
+        else:
+            if channel == self.nickname:
+                self.log_handler.info("%s | %s set mode -%s %s" % (channel, user, modes, " ".join(args)))
+            else:
+                self.log_handler.info("%s | %s set mode -%s %s" % (channel, user, modes, " ".join(args)))
 
     def kickedFrom(self, channel, kicker, message):
         """
@@ -105,7 +116,7 @@ class Bot(irc.IRCClient):
             (str) kicker:  Person who kicked the bot
             (str) message: Kick message that was issued
         """
-        pass
+        self.log_handler.info("%s | kicked by %s (%s)" % (channel, kicker, message))
 
     def nickChanged(self, nick):
         """
@@ -114,7 +125,7 @@ class Bot(irc.IRCClient):
         Params:
             (str) nick: New nick
         """
-        pass
+        self.log_handler.info("Nick changed to %s." % nick)
 
     def userJoined(self, user, channel):
         """
@@ -124,17 +135,17 @@ class Bot(irc.IRCClient):
             (str) user:    Userhost of the person that joined
             (str) channel: Channel the person joined
         """
-        pass
+        self.log_handler.info("%s | %s joined." % (channel, user))
 
     def userLeft(self, user, channel):
         """
         Called when someone leaves the channel.
 
         Params:
-            (str) user:    Userhost of the person that joined
-            (str) channel: Channel the person joined
+            (str) user:    Userhost of the person that left
+            (str) channel: Channel the person left
         """
-        pass
+        self.log_handler.info("%s | %s left." % (channel, user))
 
     def userKicked(self, kickee, channel, kicker, message):
         """
@@ -146,17 +157,17 @@ class Bot(irc.IRCClient):
             (str) kicker:  The person who kicked them
             (str) message: The kick message
         """
-        pass
+        self.log_handler.info("%s | %s was kicked by %s (%s)." % (channel, kickee, kicker, message))
 
-    def irc_QUIT(self, user, params):
+    def userQuit(self, user, message):
         """
         Called when someone quits IRC.
 
         Params:
-            (str) user:   The hostmask of the user who quit
-            (???) params: ???
+            (str) user:    The hostmask of the user who quit
+            (???) message: The user's quit message
         """
-        pass
+        self.log_handler.info("%s quit (%s)." % (user, message))
 
     def topicUpdated(self, user, channel, newTopic):
         """
@@ -167,41 +178,30 @@ class Bot(irc.IRCClient):
             (str) channel:  Channel the topic was set in
             (str) newTopic: The new topic
         """
-        pass
+        self.log_handler.info("%s | %s set topic to \"%s\"" % (channel, user, newTopic))
 
-    def irc_NICK(self, prefix, params):
+    def userRenamed(self, oldname, newname):
         """
         Called when someone changes the nick
 
         Params:
-            (???) prefix: ???
-            (???) params: ???
+            (???) oldname: User's old nick
+            (???) newname: User's new nick
         """
-        pass
-
-    def irc_RPL_WHOREPLY(self, *nargs):
-        """
-        Called when the server responds to a WHO request.
-
-        Params:
-            (???) nargs: ???
-        """
-        pass
-
-    def irc_RPL_ENDOFWHO(self, *nargs):
-        """
-        Called when the server finishes responding to a WHO request.
-
-        Params:
-            (???) nargs: ???
-        """
-        pass
+        self.log_handler.info("%s is now known as %s." % (oldname, newname))
 
 class BotFactory(protocol.ClientFactory):
-    protocol = Bot
 
-    def __init__(self):
-        pass
+    def __init__(self, nickname, channels, jsonapi_settings, log_handler):
+        self.nickname = nickname
+        self.jsonapi_settings = jsonapi_settings
+        self.log_handler = log_handler
+        self.log_handler.debug("Creating protocol instance")
+        self.protocol = Bot
+
+        self.protocol.log_handler = log_handler
+        self.protocol.jsonapi_settings = jsonapi_settings
+        self.protocol.channels_to_join = channels
 
     def clientConnectionLost(self, connector, reason):
         """
@@ -211,7 +211,8 @@ class BotFactory(protocol.ClientFactory):
             (Connector) connector: Connector object
             (str)       reason:    Reason for the disconnect
         """
-        pass
+        reason_string = str(reason).split(": ")[3]
+        self.log_handler.warn("Connection lost: %s." % reason_string)
 
     def clientConnectionFailed(self, connector, reason):
         """
@@ -221,4 +222,5 @@ class BotFactory(protocol.ClientFactory):
             (Connector) connector: Connector object
             (str)       reason:    Reason for the disconnect
         """
-        pass
+        reason_string = str(reason).split(": ")[3]
+        self.log_handler.warn("Connection failed: %s." % reason_string)
